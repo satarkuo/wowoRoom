@@ -1,0 +1,113 @@
+  .section-title {
+    text-align: center;
+    font-size: 1.75rem;
+    margin-bottom: 30px;
+  }
+  @media (max-width: 911px) {
+    .section-title {
+      font-size: 1.2rem;
+    }
+  }
+
+  .chartArea {
+    display: flex;
+    justify-content: center;
+  }
+  .chartArea .box {
+    width:40%;
+    margin:0 2%;
+  }
+  .discardAllBtn {
+    display: inline-block;
+    text-decoration: none;
+    padding: 5px 15px;
+    color: #000000;
+    border: 1.3px solid #000000;
+    border-radius: 5px;
+    font-size: 1.25rem;
+  }
+  
+  .discardAllBtn:hover {
+    background-color: #000000;
+    color: #FFFFFF;
+  }
+  
+  .orderPage-list {
+    padding: 60px 10px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+  }
+  
+  .orderPage-list .discardAllBtn {
+    -ms-flex-item-align: end;
+        align-self: flex-end;
+    margin-bottom: 12px;
+  }
+  
+  .orderPage-table {
+    border: 1px solid #000000;
+    width: 100%;
+  }
+  
+  .orderPage-table th, .orderPage-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #000000;
+  }
+
+  .orderPage-table td.noData {
+    text-align: center;
+    color:#aaa;
+    background: #eee;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 1110px) {
+    .orderPage-table {
+      width: 1100px;
+    }
+  }
+  
+  .delSingleOrder-Btn {
+    display: block;
+    background-color: #C44021;
+    color: #fff;
+    border: 0;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .delSingleOrder-Btn:hover {
+    opacity: 0.8;
+  }
+  
+  .orderStatus a {
+    padding: 10px;
+    display: block;
+    color: #0067CE;
+  }
+  
+  .orderTableWrap {
+    overflow-x: scroll;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+  
+  .orderTableWrap::-webkit-scrollbar {
+    display: none;
+  }
+  .orderTableWrap a {
+    text-decoration:none;
+  }
+  .disabled{
+    display: none;
+  }
+  .status-done { color:green;}
+  .status-undo { color:red; }
