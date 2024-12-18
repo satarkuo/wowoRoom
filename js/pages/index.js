@@ -8,7 +8,7 @@ const deleteAllProducts = document.querySelector(".discardAllBtn");
 const cartTotal = document.querySelector(".cartTotal");
 const sendOrderBtn = document.querySelector(".orderInfo-btn");
 const orderInfoForm = document.querySelector('.orderInfo-form');
-
+const orderInfoMessage = document.querySelectorAll('.orderInfo-message');
 
 
 //取得產品列表
@@ -95,7 +95,7 @@ const renderCartTable = () => {
 //渲染cartTable HTML
 const renderCartTableHTML =  (item) => {
     let total = item.product.price * item.quantity;
-    return `<tr>
+    return `<tr data-cartId="${item.id}" data-title="${item.product.title}">
                 <td>
                     <div class="cardItem-title">
                         <img src="${item.product.images}" alt="">
@@ -103,10 +103,10 @@ const renderCartTableHTML =  (item) => {
                     </div>
                 </td>
                 <td>NT$${formatNumber(item.product.price)}</td>
-                <td>${item.quantity}</td>
+                <td><button type="button" class="minusBtn material-icons">remove</button>${item.quantity}<button type="button" class="addBtn material-icons">add</button></td>
                 <td>NT$${formatNumber(total)}</td>
                 <td class="discardBtn">
-                    <a href="#" class="material-icons deleteBtn" data-cartId="${item.id}" data-title="${item.product.title}" >
+                    <a href="#" class="material-icons deleteBtn"  >
                         clear
                     </a>
                 </td>
@@ -115,6 +115,12 @@ const renderCartTableHTML =  (item) => {
 
 //加入購物車
 const addCartItem = (id,name) => {
+
+    //暫時disabled加入購物車按鈕，避免短時間送出多次API
+    const addCardBtn = document.querySelectorAll('.addCardBtn');
+    addCardBtn.forEach((item) => {
+        item.classList.add("disabled");
+    })
 
     //判斷產品數量，預設為1，若購物車已有此產品則累加數量
     let num = 1;
@@ -138,7 +144,11 @@ const addCartItem = (id,name) => {
             title: `產品已加入購物車`,
             text: `${name}  ( 總數量：${num} )`,
           });
+
         getCartList();
+        addCardBtn.forEach((item) => {
+            item.classList.remove("disabled");
+        })
     })
     .catch((error) => {
         Toast.fire({
@@ -146,6 +156,9 @@ const addCartItem = (id,name) => {
             title: "加入購物車失敗",
             text: error
           });
+        addCardBtn.forEach((item) => {
+            item.classList.remove("disabled");
+        })
     });
 }
 
@@ -158,6 +171,55 @@ productList.addEventListener('click', (e) => {
         addCartItem(productId,productName);
     }
 })
+
+//編輯購物車產品數量
+const updateCartProductQuantity = (id,name,num) => {
+    const data = {
+        data: {
+            id: id,
+            quantity: num
+        }
+    }
+    //暫時disabled加入購物車按鈕，避免短時間送出多次API
+    const minusBtn = document.querySelectorAll('.minusBtn');
+    const addBtn = document.querySelectorAll('.addBtn');
+    minusBtn.forEach((item) => {
+        item.classList.add("disabled");
+    })
+    addBtn.forEach((item) => {
+        item.classList.add("disabled");
+    })
+
+    // patch api    
+    axios.patch(`${customerApi}/carts`,data)
+    .then((response) => {
+        Toast.fire({
+            icon: "success",
+            title: `產品數量已更新`,
+            text: `${name} 總數量變更為：${num}`,
+          });
+        getCartList();
+        minusBtn.forEach((item) => {
+            item.classList.remove("disabled");
+        })
+        addBtn.forEach((item) => {
+            item.classList.remove("disabled");
+        })
+    })
+    .catch((error) => {
+        Toast.fire({
+            icon: "error",
+            title: "產品數量更新失敗",
+            text: error
+          });
+        minusBtn.forEach((item) => {
+            item.classList.remove("disabled");
+        })
+        addBtn.forEach((item) => {
+            item.classList.remove("disabled");
+        })
+    });
+}
 
 //清空購物車
 const deleteCartList = () => {
@@ -190,7 +252,7 @@ const deleteCartProduct = (id,name) => {
     .then((response) => {
         Toast.fire({
             icon: "success",
-            title: `產品「${name}」已從移除購物車`,
+            title: `產品「${name}」已從購物車移除`,
           });
         getCartList();
     })
@@ -202,19 +264,41 @@ const deleteCartProduct = (id,name) => {
           });
     });
 }
-//監聽：購物車刪除單一產品
+//監聽：購物車刪除單一產品、購物車編輯數量
 cartTableTbody.addEventListener('click', (e) => {
     e.preventDefault();
+    const cartId = e.target.closest('tr').getAttribute('data-cartId');
+    const productName = e.target.closest('tr').getAttribute('data-title');
+    //購物車刪除單一產品
     if(e.target.classList.contains('deleteBtn')){
-        const cartId = e.target.getAttribute('data-cartId');
-        const productName = e.target.getAttribute('data-title');
         deleteCartProduct(cartId,productName);
+    };
+
+    //購物車編輯數量：增加
+    if (e.target.classList.contains('addBtn')) {
+        const addItem = cartData.find(item => item.id === cartId);
+        if (addItem) {
+            addItem.quantity++;
+            updateCartProductQuantity(cartId, productName, addItem.quantity);
+        }
     }
+    //購物車編輯數量：減少
+    if (e.target.classList.contains('minusBtn')) {
+        const minusItem = cartData.find(item => item.id === cartId);
+        if (minusItem.quantity === 1) {
+            deleteCartProduct(cartId,productName);
+        } else {
+            minusItem.quantity--;
+            updateCartProductQuantity(cartId, productName, minusItem.quantity);
+        }
+    }
+
 })
 
 //驗證表單
 const checkForm = () => {
     const constraints = {
+        //input:name
         姓名: {
           presence: { message: "^必填" },
         },
@@ -229,39 +313,33 @@ const checkForm = () => {
           presence: { message: "^必填" },
         },
     };
-    const error = validate(orderInfoForm, constraints); // validate(驗證的表單,規則)
-    // console.log(error);
-    // {
-    //     "姓名": [
-    //         "必填"
-    //     ],
-    //     "電話": [
-    //         "必填"
-    //     ],
-    //     "Email": [
-    //         "必填"
-    //     ],
-    //     "寄送地址": [
-    //         "必填"
-    //     ]
-    // }
+    const errors = validate(orderInfoForm, constraints); // validate(驗證的表單,規則)
+    orderInfoMessage.forEach(element => { element.textContent = ''}) //清空所有提示訊息
+    //若有錯誤訊息，則渲染到對應位置顯示
+    if(errors){
+        const errorsArr = Object.keys(errors);
+        errorsArr.forEach(item => {
+            const message = document.querySelector(`[data-message="${item}"]`);
+            message.textContent = errors[item][0];
+        })
+    }
+    return errors;
 }
 
 //送出訂單
 const sendOrder = () => {
+    checkForm();
     if(cartData.length === 0){
         Toast.fire({
             icon: "error",
             title: "購物車沒有商品",
-            text: error
         });
         return;
     }
     if(checkForm()){
         Toast.fire({
             icon: "error",
-            title: "表單未填寫完整",
-            text: error
+            title: "請確認欄位是否已正確填寫",
         });
         return;
     }
@@ -274,11 +352,11 @@ const sendOrder = () => {
     const data = {
         data: {
             user: {
-            name: customerName.value.trim(),
-            tel: customerPhone.value.trim(),
-            email: customerEmail.value.trim(),
-            address: customerAddress.value.trim(),
-            payment: tradeWay.value,
+                name: customerName.value.trim(),
+                tel: customerPhone.value.trim(),
+                email: customerEmail.value.trim(),
+                address: customerAddress.value.trim(),
+                payment: tradeWay.value,
             },
         },
     };
