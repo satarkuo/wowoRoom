@@ -98,7 +98,6 @@ const updateOrderStatus = (id) => {
             result = order;
         }
     })
-    console.log(result)
     const data = {
         data: {
           id: id,
