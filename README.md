@@ -25,12 +25,12 @@
 - SweetAlert2
 - C3.js 圖表
 
-## 📚 指導導師（六角學院）
+## 指導導師（六角學院）
 
 - JS技術導師：洧杰校長、穎旻老師
 - 課程助教：傑利助教
 
-### ✨ JS 完課證書（六角學院）
+## JS 完課證書（六角學院）
 - 所有作業皆以最高等級LV3完成
 
 ![截圖](https://github.com/satarkuo/SmartPawLife/blob/main/screenshots/jsCertificate.png)
